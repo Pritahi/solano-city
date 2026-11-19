@@ -7,12 +7,16 @@
   <style>
     html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #efb47c; }
     canvas { display: block; width: 100%; height: 100%; }
+    #play-hint { position: fixed; left: 18px; bottom: 16px; color: #fff3dc; font: 600 14px/1.4 system-ui, sans-serif; text-shadow: 0 1px 5px #30251f; pointer-events: none; user-select: none; }
   </style>
 </head>
 <body>
   <canvas id="city-canvas" aria-label="A sunlit view over Solano City"></canvas>
+  <div id="play-hint">Click to play · WASD move · Shift sprint · Esc unlock</div>
   <script src="game/vendor/three.min.js"></script>
   <script src="game/city.js"></script>
+  <script src="game/player.js"></script>
+  <script src="game/controls.js"></script>
   <script src="game/main.js"></script>
 </body>
 </html>

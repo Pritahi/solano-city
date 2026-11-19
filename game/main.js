@@ -1,4 +1,4 @@
-// Boot the renderer, lighting, camera orbit, and animation loop for Solano City.
+// Boot the renderer, lighting, on-foot character, controls, and gameplay loop.
 (function () {
   'use strict';
 
@@ -17,7 +17,6 @@
   renderer.toneMappingExposure = 1.05;
 
   const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 500);
-  const cityCenter = new THREE.Vector3(0, 0, 0);
 
   scene.add(new THREE.HemisphereLight(0xd6eaff, 0x71523e, 1.25));
 
@@ -35,24 +34,17 @@
   sun.shadow.normalBias = 0.025;
   scene.add(sun);
 
-  SolanoCity.build(scene);
+  const city = SolanoCity.build(scene);
+  const spawn = new THREE.Vector3(city.streetSpawn.x, 0, city.streetSpawn.z);
+  const player = SolanoPlayer.create(scene, spawn);
+  const controls = SolanoControls.create(canvas, camera, city.buildings);
 
   let previousTime = 0;
-  let elapsed = 0;
   function animate(time) {
     requestAnimationFrame(animate);
     const deltaTime = previousTime === 0 ? 0 : Math.min((time - previousTime) / 1000, 0.05);
     previousTime = time;
-    elapsed += deltaTime;
-
-    const orbitAngle = elapsed * 0.035;
-    const orbitRadius = 205;
-    camera.position.set(
-      Math.sin(orbitAngle) * orbitRadius,
-      92 + Math.sin(elapsed * 0.12) * 2.5,
-      Math.cos(orbitAngle) * orbitRadius
-    );
-    camera.lookAt(cityCenter);
+    controls.update(deltaTime, player, time / 1000);
     renderer.render(scene, camera);
   }
 

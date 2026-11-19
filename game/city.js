@@ -156,6 +156,7 @@ window.SolanoCity = (function () {
   function addBuildings(scene) {
     const random = createRandom(73421);
     const blocksPerSide = BLOCKS_PER_SIDE;
+    const buildingBounds = [];
     const blockIndexes = [];
     for (let index = 0; index < blocksPerSide * blocksPerSide; index += 1) blockIndexes.push(index);
     for (let index = blockIndexes.length - 1; index > 0; index -= 1) {
@@ -190,6 +191,14 @@ window.SolanoCity = (function () {
         true,
         true
       );
+      buildingBounds.push({
+        minX: body.position.x - width / 2,
+        maxX: body.position.x + width / 2,
+        minY: 0,
+        maxY: height + 0.5,
+        minZ: body.position.z - depth / 2,
+        maxZ: body.position.z + depth / 2
+      });
       const roofColor = ROOF_COLORS[Math.floor(random() * ROOF_COLORS.length)];
       const roof = new THREE.Mesh(
         new THREE.BoxGeometry(width + 0.12, 0.24 + random() * 0.22, depth + 0.12),
@@ -200,6 +209,7 @@ window.SolanoCity = (function () {
       roof.receiveShadow = true;
       scene.add(roof);
     }
+    return buildingBounds;
   }
 
   function firstBlockCenter() {
@@ -208,7 +218,12 @@ window.SolanoCity = (function () {
 
   function build(scene) {
     addGroundAndStreets(scene);
-    addBuildings(scene);
+    // The centered crossing is the middle gap in the block grid: x=0 and z=0.
+    const middleStreet = firstBlockCenter() + (BLOCKS_PER_SIDE / 2 - 0.5) * ROAD_STEP;
+    return {
+      buildings: addBuildings(scene),
+      streetSpawn: { x: middleStreet, z: middleStreet }
+    };
   }
 
   return { build: build };
