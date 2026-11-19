@@ -43,6 +43,15 @@
   const spawn = new THREE.Vector3(city.streetSpawn.x, 0, city.streetSpawn.z);
   const player = SolanoPlayer.create(scene, spawn);
   const controls = SolanoControls.create(canvas, camera, city.buildings);
+  const vehicles = SolanoVehicles.create(scene, city.grid, city.buildings, seed);
+
+  if (shot === 'play') {
+    const parkedCar = vehicles.stagePlayerBesideParked(player, 0);
+    controls.setEnabled(false);
+    const lookAt = parkedCar.root.position.clone().add(new THREE.Vector3(0, 1.15, 1.1));
+    camera.position.set(parkedCar.root.position.x + 9.5, 4.4, parkedCar.root.position.z + 10.5);
+    camera.lookAt(lookAt);
+  }
 
   let previousTime = 0;
   let renderedFrames = 0;
@@ -50,7 +59,8 @@
     requestAnimationFrame(animate);
     const deltaTime = previousTime === 0 ? 0 : Math.min((time - previousTime) / 1000, 0.05);
     previousTime = time;
-    controls.update(deltaTime, player, time / 1000);
+    const driving = vehicles.update(deltaTime, player, controls, camera);
+    if (!driving) controls.update(deltaTime, player, time / 1000);
     renderer.render(scene, camera);
     renderedFrames += 1;
     if (shot && renderedFrames >= 2) window.__shotReady = true;

@@ -223,9 +223,20 @@ window.SolanoCity = (function () {
     addGroundAndStreets(scene, random);
     // The centered crossing is the middle gap in the block grid: x=0 and z=0.
     const middleStreet = firstBlockCenter() + (BLOCKS_PER_SIDE / 2 - 0.5) * ROAD_STEP;
+    const roadCenters = [];
+    for (let index = 0; index < BLOCKS_PER_SIDE - 1; index += 1) {
+      roadCenters.push(firstBlockCenter() + (index + 0.5) * ROAD_STEP);
+    }
     return {
       buildings: addBuildings(scene, random),
-      streetSpawn: { x: middleStreet, z: middleStreet }
+      streetSpawn: { x: middleStreet, z: middleStreet },
+      grid: {
+        roadCenters: roadCenters,
+        roadWidth: ROAD_WIDTH,
+        cityHalf: CITY_HALF,
+        roadStep: ROAD_STEP,
+        blockWidth: BLOCK_WIDTH
+      }
     };
   }
 

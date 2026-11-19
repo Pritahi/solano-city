@@ -14,6 +14,7 @@ window.SolanoControls = (function () {
     let verticalSpeed = 0;
     let locked = false;
     let cameraReady = false;
+    let enabled = true;
     const target = new THREE.Vector3();
     const desiredCamera = new THREE.Vector3();
     const cameraOffset = new THREE.Vector3();
@@ -85,6 +86,7 @@ window.SolanoControls = (function () {
     }
 
     function update(deltaTime, character, time) {
+      if (!enabled) return;
       const dt = Math.min(deltaTime, 0.05);
       const position = character.root.position;
 
@@ -147,7 +149,11 @@ window.SolanoControls = (function () {
       camera.lookAt(target);
     }
 
-    return { update: update };
+    return {
+      update: update,
+      setEnabled: function (value) { enabled = Boolean(value); },
+      isEnabled: function () { return enabled; }
+    };
   }
 
   return { create: create };
