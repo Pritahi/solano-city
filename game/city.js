@@ -35,7 +35,7 @@ window.SolanoCity = (function () {
     return mesh;
   }
 
-  function addPalm(scene, x, z, scale, rotation) {
+  function addPalm(scene, x, z, scale, rotation, random) {
     const trunkHeight = 6.2 * scale;
     const trunk = new THREE.Mesh(
       new THREE.CylinderGeometry(0.22 * scale, 0.38 * scale, trunkHeight, 7),
@@ -48,7 +48,7 @@ window.SolanoCity = (function () {
     scene.add(trunk);
 
     const frondMaterial = material(0x397348);
-    const frondCount = 5 + Math.abs(Math.floor(x * 3 + z * 5 + rotation * 11)) % 3;
+    const frondCount = 5 + Math.floor(random() * 3);
     for (let index = 0; index < frondCount; index += 1) {
       const angle = rotation + index * (Math.PI * 2 / frondCount);
       const frond = new THREE.Mesh(
@@ -68,7 +68,7 @@ window.SolanoCity = (function () {
     }
   }
 
-  function addGroundAndStreets(scene) {
+  function addGroundAndStreets(scene, random) {
     const ground = new THREE.Mesh(
       new THREE.PlaneGeometry(CITY_HALF * 2 + 80, CITY_HALF * 2 + 80),
       material(0xcbb797)
@@ -138,8 +138,8 @@ window.SolanoCity = (function () {
         const palmOffset = ROAD_WIDTH / 2 + SIDEWALK_WIDTH / 2;
         for (let block = 0; block < BLOCKS_PER_SIDE; block += 2) {
           const alongStreet = firstBlock + block * ROAD_STEP;
-          addPalm(scene, center + side * palmOffset, alongStreet, 0.82, line * 0.55 + block * 0.3);
-          addPalm(scene, alongStreet, center + side * palmOffset, 0.78, line * 0.45 + block * 0.4 + 0.6);
+          addPalm(scene, center + side * palmOffset, alongStreet, 0.82, line * 0.55 + block * 0.3, random);
+          addPalm(scene, alongStreet, center + side * palmOffset, 0.78, line * 0.45 + block * 0.4 + 0.6, random);
         }
       });
     }
@@ -148,13 +148,15 @@ window.SolanoCity = (function () {
   function createRandom(seed) {
     let state = seed >>> 0;
     return function () {
-      state = (state * 1664525 + 1013904223) >>> 0;
-      return state / 4294967296;
+      state += 0x6D2B79F5;
+      let value = state;
+      value = Math.imul(value ^ (value >>> 15), value | 1);
+      value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+      return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
     };
   }
 
-  function addBuildings(scene) {
-    const random = createRandom(73421);
+  function addBuildings(scene, random) {
     const blocksPerSide = BLOCKS_PER_SIDE;
     const buildingBounds = [];
     const blockIndexes = [];
@@ -216,12 +218,13 @@ window.SolanoCity = (function () {
     return -(BLOCKS_PER_SIDE - 1) * ROAD_STEP / 2;
   }
 
-  function build(scene) {
-    addGroundAndStreets(scene);
+  function build(scene, seed) {
+    const random = createRandom(seed);
+    addGroundAndStreets(scene, random);
     // The centered crossing is the middle gap in the block grid: x=0 and z=0.
     const middleStreet = firstBlockCenter() + (BLOCKS_PER_SIDE / 2 - 0.5) * ROAD_STEP;
     return {
-      buildings: addBuildings(scene),
+      buildings: addBuildings(scene, random),
       streetSpawn: { x: middleStreet, z: middleStreet }
     };
   }
